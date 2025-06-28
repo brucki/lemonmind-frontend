@@ -88,6 +88,17 @@ export interface Database {
           is_featured: boolean;
           weight: number | null;
           weight_unit: string;
+          // GPSR Fields
+          gpsr_identification_details: string | null;
+          gpsr_pictograms: string[] | null;
+          gpsr_declarations_of_conformity: string | null;
+          gpsr_certificates: string[] | null;
+          gpsr_moderation_status: 'pending' | 'approved' | 'rejected';
+          gpsr_moderation_comment: string | null;
+          gpsr_last_submission_date: string | null;
+          gpsr_last_moderation_date: string | null;
+          gpsr_submitted_by_supplier_user: string | null;
+          // Timestamps
           created_at: string;
           updated_at: string;
         };
@@ -108,6 +119,17 @@ export interface Database {
           is_featured?: boolean;
           weight?: number | null;
           weight_unit?: string;
+          // GPSR Fields
+          gpsr_identification_details?: string | null;
+          gpsr_pictograms?: string[] | null;
+          gpsr_declarations_of_conformity?: string | null;
+          gpsr_certificates?: string[] | null;
+          gpsr_moderation_status?: 'pending' | 'approved' | 'rejected';
+          gpsr_moderation_comment?: string | null;
+          gpsr_last_submission_date?: string | null;
+          gpsr_last_moderation_date?: string | null;
+          gpsr_submitted_by_supplier_user?: string | null;
+          // Timestamps
           created_at?: string;
           updated_at?: string;
         };
@@ -128,6 +150,17 @@ export interface Database {
           is_featured?: boolean;
           weight?: number | null;
           weight_unit?: string;
+          // GPSR Fields
+          gpsr_identification_details?: string | null;
+          gpsr_pictograms?: string[] | null;
+          gpsr_declarations_of_conformity?: string | null;
+          gpsr_certificates?: string[] | null;
+          gpsr_moderation_status?: 'pending' | 'approved' | 'rejected';
+          gpsr_moderation_comment?: string | null;
+          gpsr_last_submission_date?: string | null;
+          gpsr_last_moderation_date?: string | null;
+          gpsr_submitted_by_supplier_user?: string | null;
+          // Timestamps
           created_at?: string;
           updated_at?: string;
         };
@@ -234,6 +267,7 @@ export interface CategoryFormData {
 }
 
 export interface ProductFormData {
+  // Basic Information
   name: string;
   slug: string;
   description?: string;
@@ -248,7 +282,23 @@ export interface ProductFormData {
   is_featured: boolean;
   weight?: number | null;
   weight_unit: string;
-  category_ids?: string[]; // For handling multiple categories
+  category_ids?: string[];
+  
+  // GPSR Information
+  gpsr_identification_details?: string;
+  gpsr_pictograms?: File[];
+  gpsr_declarations_of_conformity?: File | null;
+  gpsr_certificates?: File[];
+  gpsr_moderation_status?: 'pending' | 'approved' | 'rejected';
+  gpsr_moderation_comment?: string;
+  gpsr_last_submission_date?: string;
+  gpsr_last_moderation_date?: string;
+  gpsr_submitted_by_supplier_user?: string;
+  
+  // Helper fields for form handling
+  existing_gpsr_pictograms?: string[];
+  existing_gpsr_declarations_of_conformity?: string | null;
+  existing_gpsr_certificates?: string[];
 }
 
 // Type for product with relations

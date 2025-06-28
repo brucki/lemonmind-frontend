@@ -3,7 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+});
 
 // Auth functions
 export const signUp = async (email: string, password: string) => {
@@ -30,6 +36,29 @@ export const signOut = async () => {
 export const getCurrentUser = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   return user;
+};
+
+// Password reset
+export const resetPassword = async (email: string) => {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/update-password`,
+  });
+  return { data, error };
+};
+
+export const updateUserPassword = async (newPassword: string) => {
+  const { data, error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+  return { data, error };
+};
+
+export const verifyOtp = async (token: string, type: 'signup' | 'recovery' | 'magiclink' | 'email') => {
+  const { data, error } = await supabase.auth.verifyOtp({
+    token_hash: token,
+    type,
+  });
+  return { data, error };
 };
 
 // Categories

@@ -95,10 +95,21 @@ export function AuthProvider({
     } else if (event === 'SIGNED_OUT') {
       setUser(null);
       
-      // Don't redirect if we're on the signup page
-      if (requireAuth && 
-          window.location.pathname !== loginPath && 
-          !window.location.pathname.startsWith('/signup')) {
+      // Don't redirect if we're on the signup, forgot password, or update password page
+      const currentPath = window.location.pathname;
+      const publicPaths = [
+        loginPath,
+        '/signup',
+        '/forgot-password',
+        '/update-password'
+      ];
+      
+      const isPublicPath = publicPaths.some(path => 
+        path === currentPath || currentPath.startsWith(path)
+      );
+      
+      if (requireAuth && !isPublicPath) {
+        console.log('Redirecting to login from path:', currentPath);
         navigate(loginPath, { replace: true });
       }
     }
@@ -118,10 +129,12 @@ export function AuthProvider({
         setLoading(false);
         
         // If no session and auth is required, redirect to login
-        // Skip redirection if we're on the signup page
+        // Skip redirection if we're on the signup or forgot password page
+        const currentPath = window.location.pathname;
         if (!session && requireAuth && 
-            window.location.pathname !== loginPath && 
-            !window.location.pathname.startsWith('/signup')) {
+            currentPath !== loginPath && 
+            !currentPath.startsWith('/signup') &&
+            currentPath !== '/forgot-password') {
           navigate(loginPath, { replace: true });
         }
       }
@@ -248,9 +261,10 @@ export function AuthProvider({
 
   // Reset password
   const resetPassword = useCallback(async (email: string) => {
+    const redirectTo = `${window.location.origin}/update-password`;
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/update-password`,
+        redirectTo
       });
       return { error };
     } catch (error) {
@@ -259,49 +273,61 @@ export function AuthProvider({
     }
   }, []);
 
-  // Update user profile
-  const updateUser = useCallback(
-    async (data: UpdateUserData): Promise<AuthResponse<User>> => {
-      try {
-        const { data: updatedUser, error } = await supabase.auth.updateUser({
-          email: data.email,
-          password: data.password,
-          data: data.data,
-        });
-        
-        if (updatedUser?.user) {
-          setUser(updatedUser.user);
-        }
-        
-        return {
-          error,
-          user: updatedUser?.user || null,
-          data: updatedUser?.user || undefined
-        };
-      } catch (error) {
-        console.error('Update user error:', error);
+  // Update user data
+  const updateUser = useCallback(async (data: UpdateUserData): Promise<AuthResponse<User>> => {
+    try {
+      const { data: updatedUser, error } = await supabase.auth.updateUser({
+        email: data.email,
+        password: data.password,
+        data: data.data,
+      });
+      
+      if (error) {
+        return { error, user: null };
+      }
+      
+      // Update local user state
+      if (updatedUser?.user) {
+        setUser(updatedUser.user);
         return { 
-          error: error as AuthError,
-          user: null
+          user: updatedUser.user, 
+          error: null,
+          data: updatedUser.user
         };
       }
-    },
-    [setUser]
-  );
+      
+      return { user: null, error: null };
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return { 
+        error: error as AuthError, 
+        user: null 
+      };
+    }
+  }, []);
 
-  // Update password
+  // Update user password
   const updatePassword = useCallback(async (newPassword: string) => {
     try {
       const { error } = await supabase.auth.updateUser({
-        password: newPassword,
+        password: newPassword
       });
-      return { error };
+      
+      if (error) throw error;
+      
+      // Refresh session to get updated user data
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+      }
+      
+      return { error: null };
     } catch (error) {
-      console.error('Update password error:', error);
+      console.error('Error updating password:', error);
       return { error: error as AuthError };
     }
   }, []);
-  
+
   // Send verification email
   const sendVerificationEmail = useCallback(async (email: string) => {
     try {

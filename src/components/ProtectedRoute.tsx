@@ -17,7 +17,10 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!user) {
+  // Lista ścieżek, które są dostępne bez logowania
+  const publicPaths = ['/forgot-password', '/update-password'];
+  
+  if (!user && !publicPaths.some(path => window.location.pathname.startsWith(path))) {
     return <Navigate to="/login" replace />;
   }
 

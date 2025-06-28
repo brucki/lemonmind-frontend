@@ -4,6 +4,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import UpdatePassword from './pages/UpdatePassword';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import NewProduct from './pages/NewProduct';
@@ -34,6 +36,8 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/update-password" element={<UpdatePassword />} />
           
           {/* Protected routes */}
           <Route element={<ProtectedLayout />}>
